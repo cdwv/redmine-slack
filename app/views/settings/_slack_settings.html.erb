@@ -44,3 +44,27 @@
 	<label for="settings_post_wiki_updates">Post Wiki Updates?</label>
 	<input type="checkbox" id="settings_post_wiki_updates" value="1" name="settings[post_wiki_updates]" <%= settings['post_wiki_updates'] == '1' ? 'checked="checked"' : '' %> />
 </p>
+
+<p>
+	<label for="settings_hidden_fields" style="font-weight: bold;">Hide fields</label>
+</p>
+<% for field in RedmineSlack::HIDEABLE_CORE_FIELDS %>
+<p>
+    <label for="settings_hiddenfields_<%= field %>"><%= l "field_"+field.sub(/_id$/, '') %></label>
+    <%= check_box_tag "settings[hiddenfields][#{field}]", '1', (@settings['hiddenfields'][field] rescue false) %> 
+</p>
+<% end %>
+
+<% for field in RedmineSlack::EXTRA_FIELDS %>
+<p>
+    <label for="settings_hiddenfields_<%= field[:id] %>"><%= l field[:label] %></label>
+    <%= check_box_tag "settings[hiddenfields][#{field[:id]}]", '1', (@settings['hiddenfields'][field[:id]] rescue false) %> 
+</p>
+<% end %>
+
+<% for field in RedmineSlack.custom_field_list %>
+<p>
+    <label for="settings_hiddenfields_<%= field.id %>"><%= field.name %></label>
+    <%= check_box_tag "settings[hiddenfields][#{field.id.to_s}]", '1', (@settings['hiddenfields'][field.id.to_s] rescue false) %> 
+</p>
+<% end %>

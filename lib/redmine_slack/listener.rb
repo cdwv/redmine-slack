@@ -51,8 +51,11 @@ class SlackListener < Redmine::Hook::Listener
 		msg = "[#{escape issue.project}] #{escape journal.user.to_s} updated <#{object_url issue}|#{escape issue}>#{mentions journal.notes}"
 
 		attachment = {}
-		attachment[:text] = escape journal.notes if journal.notes
-		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		attachment[:text] = escape journal.notes if journal.notes and not Setting.plugin_redmine_slack['hiddenfields'].keys.include? "notes" 
+
+		attachment[:fields] = journal.details
+		    .map { |d| detail_to_field d }
+		    .select { |f| f[:display] }
 
 		speak msg, channel, attachment, url
 	end
@@ -99,7 +102,9 @@ class SlackListener < Redmine::Hook::Listener
 
 		attachment = {}
 		attachment[:text] = ll(Setting.default_language, :text_status_changed_by_changeset, "<#{revision_url}|#{escape changeset.comments}>")
-		attachment[:fields] = journal.details.map { |d| detail_to_field d }
+		attachment[:fields] = journal
+            .details.map { |d| detail_to_field d }
+		    .select { |f| f[:display] }
 
 		speak msg, channel, attachment, url
 	end
@@ -212,6 +217,9 @@ private
 	end
 
 	def detail_to_field(detail)
+
+		display = Setting.plugin_redmine_slack['hiddenfields'].keys.exclude? detail.prop_key.to_s
+	        
 		if detail.property == "cf"
 			key = CustomField.find(detail.prop_key).name rescue nil
 			title = key
@@ -264,7 +272,8 @@ private
 
 		value = "-" if value.empty?
 
-		result = { :title => title, :value => value }
+		
+		result = { :title => title, :value => value, :display => display }
 		result[:short] = true if short
 		result
 	end
