@@ -218,7 +218,7 @@ private
 
 	def detail_to_field(detail)
 
-		display = Setting.plugin_redmine_slack['hiddenfields'].keys.exclude? detail.prop_key.to_s
+        display = Setting.plugin_redmine_slack['hiddenfields'].keys.exclude? detail.prop_key.to_s rescue true
 	        
 		if detail.property == "cf"
 			key = CustomField.find(detail.prop_key).name rescue nil
